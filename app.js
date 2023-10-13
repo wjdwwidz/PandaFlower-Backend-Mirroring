@@ -5,6 +5,16 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+
+const https = require('https');
+const fs = require('fs');
+const app = express();
+const options = {
+    key: fs.readFileSync('./keys/private.pem'),
+    cert: fs.readFileSync('./keys/public.pem')
+}
+
+
 dotenv.config();
 
 const passportLocal = require('./middlewares/passportLocal');
@@ -18,7 +28,7 @@ const cartRouter = require('./routes/cartRouter');
 const adminRouter = require('./routes/adminRouter');
 const guestRouter = require('./routes/guestRouter');
 
-const app = express();
+const server = https.createServer(options, app);
 
 mongoose
   .connect(process.env.MONGO_DB_URL)
@@ -64,6 +74,6 @@ app.use((err, req, res, next) => {
   res.status(400).json({ message: err.message });
 });
 
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
   console.log(`Server is listening Port on ${process.env.PORT}`);
 });
